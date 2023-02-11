@@ -175,13 +175,13 @@ def manage_head(robot, controller_state):
 # Regular Motion
 dead_zone = 0.1  # 0.25 #0.1 #0.2 #0.3 #0.4
 move_s = 0.3
-max_dist_m = 0.2  # 0.04 #0.05
-accel_m = 0.8  # 0.1
+max_dist_m = 0.05  # 0.04 #0.05
+accel_m = 0.1  # 0.1
 command_to_linear_motion = CommandToLinearMotion(dead_zone, move_s, max_dist_m, accel_m)
 
 move_s = 0.05
 max_dist_rad = 0.10  # 0.2 #0.25 #0.1 #0.09
-accel_rad = 0.8  # 0.05
+accel_rad = 0.08  # 0.05
 command_to_rotary_motion = CommandToRotaryMotion(dead_zone, move_s, max_dist_rad, accel_rad)
 ############################
 # Fast Motion
