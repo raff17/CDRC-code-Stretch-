@@ -1,11 +1,13 @@
-#!/usr/bin/env python
+# Xbox adaptive controller code for Hello - Robot Stretch
+# By: Rafael Morales
 from __future__ import print_function
-# from inputs import get_gamepad
-from pygame import joystick
 import pygame
 import threading
 import time
+
 pygame.init()
+pygame.joystick.init()
+
 
 class Stick():
     def __init__(self):
@@ -20,24 +22,28 @@ class Stick():
         self.norm = float(pow(2, 15))
 
     def update_x(self, abs_x):
-        self.x = int(abs_x) / self.norm
+        self.x = abs_x
 
     def update_y(self, abs_y):
-        self.y = -int(abs_y) / self.norm
+        self.y = -abs_y
 
-    # def print_string(self):
-    #     return 'x: {0:4.2f}, y:{1:4.2f}'.format(x, y)
+    def print_string(self):
+        return 'x: {0:4.2f}, y:{1:4.2f}'.format(x, y)
+
+        # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN
+        # JOYBUTTONUP JOYHATMOTION
 
 
 class Button():
+
     def __init__(self):
         self.pressed = False
 
     def update(self, state):
+        if state == 1:
+            self.pressed = True
         if state == 0:
             self.pressed = False
-        elif state == 1:
-            self.pressed = True
 
     def print_string(self):
         return str(self.pressed)
@@ -64,7 +70,7 @@ class Trigger():
         self.pulled = 0.0
 
     def update(self, state):
-        self.pulled = int(state) / self.norm
+        self.pulled = int(state)
         # Ensure that the pulled value is not greater than 1.0, which
         # will can happen with the use of an Xbox One controller, if
         # the option was not properly set.
@@ -73,6 +79,9 @@ class Trigger():
 
     def print_string(self):
         return '{0:4.2f}'.format(self.pulled)
+
+        # Possible joystick actions: JOYAXISMOTION JOYBALLMOTION JOYBUTTONDOWN
+        # JOYBUTTONUP JOYHATMOTION
 
 
 class XboxController():
@@ -129,80 +138,153 @@ class XboxController():
 
     def update(self):
         while True:
+            clock = pygame.time.Clock()
+            joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
             events = pygame.event.get()
             with self.lock:
                 for event in events:
+                    # -------------------------Button-----------------------------------------------------------------
+
+                    "Detect button button"
                     if event.type == pygame.JOYBUTTONDOWN:
-                        print("you hit button")
-                        self.left_stick.update_x(event.state)
+                        if event.button == 0:
+                            self.bottom_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 0:
+                            self.bottom_button.update(0)
+
+                    "Detect right button"
                     if event.type == pygame.JOYBUTTONDOWN:
-                        self.left_stick.update_y(event.state)
+                        if event.button == 1:
+                            self.right_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 1:
+                            self.right_button.update(0)
+
+                    "Detect left button"
                     if event.type == pygame.JOYBUTTONDOWN:
-                        self.right_stick.update_x(event.state)
+                        if event.button == 2:
+                            self.left_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 2:
+                            self.left_button.update(0)
+
+                    "Detect top button"
                     if event.type == pygame.JOYBUTTONDOWN:
-                        self.right_stick.update_y(event.state)
+                        if event.button == 3:
+                            self.top_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 3:
+                            self.top_button.update(0)
 
-                    # This is the glowing X button on an authentic Xbox controller
-                    if event.code == 'BTN_MODE':
-                        self.middle_led_ring_button.update(event.state)
+                    "left shoulder button"
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 4:
+                            self.left_shoulder_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 4:
+                            self.left_shoulder_button.update(0)
 
-                    if event.code == pygame.JOYBUTTONDOWN:  # green A, bottom button
-                        self.bottom_button.update(event.state)
-                    if event.code == 'BTN_WEST':  # yellow Y, ***top button*** WEIRD!
-                        self.top_button.update(event.state)
-                    if event.code == 'BTN_NORTH':  # blue X, ***left button*** WEIRD!
-                        self.left_button.update(event.state)
-                    if event.code == 'BTN_EAST':  # red B, right button
-                        self.right_button.update(event.state)
+                    "right shoulder button"
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 5:
+                            self.right_shoulder_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 5:
+                            self.right_shoulder_button.update(0)
 
-                    if event.code == 'BTN_TL':  # left shoulder button
-                        self.left_shoulder_button.update(event.state)
-                    if event.code == 'BTN_TR':  # right shoulder button
-                        self.right_shoulder_button.update(event.state)
+                    "select button"
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 6:
+                            self.select_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 6:
+                            self.select_button.update(0)
 
-                    if event.code == 'ABS_Z':  # left trigger 0-1023
-                        self.left_trigger.update(event.state)
-                    if event.code == 'ABS_RZ':  # right trigger 0-1023
-                        self.right_trigger.update(event.state)
+                    "Detect start button"
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 7:
+                            self.start_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 7:
+                            self.start_button.update(0)
 
-                    if event.code == 'BTN_SELECT':  # 1/0
-                        self.select_button.update(event.state)
-                    if event.code == 'BTN_START':  # 1/0
-                        self.start_button.update(event.state)
+                    " Detect middle x-box button"
+                    if event.type == pygame.JOYBUTTONDOWN:
+                        if event.button == 8:
+                            self.middle_led_ring_button.update(1)
+                    if event.type == pygame.JOYBUTTONUP:
+                        if event.button == 8:
+                            self.middle_led_ring_button.update(0)
+                    #   -------------------------Sticks---------------------------------------------------------------------------
+                    if event.type == pygame.JOYAXISMOTION:
 
-                    if event.code == 'BTN_THUMBL':  # 1/0
-                        self.left_stick_button.update(event.state)
-                    if event.code == 'BTN_THUMBR':  # 1/0
-                        self.right_stick_button.update(event.state)
+                        " Left stick"
+                        if event.axis == 0:
+                            if event.value > 1:
+                                event.value = 1
+                            if event.value < -1:
+                                event.value = -1
+                            self.left_stick.update_x(event.value)
+                        if event.axis == 1:
+                            if event.value > 1:
+                                event.value = 1
+                            if event.value < -1:
+                                event.value = -1
+                            self.left_stick.update_y(event.value)
 
-                    # 4-way pad
-                    if event.code == 'ABS_HAT0Y':  # -1 up / 1 down
-                        if event.state == 0:
-                            self.top_pad.update(0)
+                        "right stick"
+                        if event.axis == 3:
+                            if event.value > 1:
+                                event.value = 1
+                            if event.value < -1:
+                                event.value = -1
+                            self.right_stick.update_x(event.value)
+                        if event.axis == 4:
+                            if event.value > 1:
+                                event.value = 1
+                            if event.value < -1:
+                                event.value = -1
+                            self.right_stick.update_y(event.value)
+
+                        # ------------------------ Triggers---------------------------------------------------------------------------
+
+                        "left trigger"
+                        if event.axis == 2 and event.value > 0:
+                            self.left_trigger.update(1)
+                        else:
+                            self.left_trigger.update(0)
+
+                        "right trigger"
+                        if event.axis == 5 and event.value > 0:
+                            self.right_trigger.update(1)
+                        else:
+                            self.right_trigger.update(0)
+
+                    if event.type == pygame.JOYHATMOTION:
+                        print(event.value)
+                        # ----------------------------Left - right pad -------------------------------------------------------
+                        if event.value == (0, 0):
+                            self.left_pad.update(0)
+                            self.right_pad.update(0)
+                        if event.value == (-1, 0):
+                            self.left_pad.update(1)
+                            self.right_pad.update(0)
+                        if event.value == (1, 0):
+                            self.left_pad.update(0)
+                            self.right_pad.update(1)
+                        # ---------------------------Up - down pad ------------------------------------------------------------
+                        if event.value == (0, 0):
                             self.bottom_pad.update(0)
-                        elif event.state == 1:
                             self.top_pad.update(0)
+                        if event.value == (0, -1):
                             self.bottom_pad.update(1)
-                        elif event.state == -1:
+                            self.top_pad.update(0)
+                        if event.value == (0, 1):
                             self.bottom_pad.update(0)
                             self.top_pad.update(1)
 
-                    if event.code == 'ABS_HAT0X':  # -1 left / 1 right
-                        if event.state == 0:
-                            self.left_pad.update(0)
-                            self.right_pad.update(0)
-                        elif event.state == 1:
-                            self.left_pad.update(0)
-                            self.right_pad.update(1)
-                        elif event.state == -1:
-                            self.right_pad.update(0)
-                            self.left_pad.update(1)
-
-                    if self.print_events:
-                        print(event.ev_type, event.code, event.state)
-                #time.sleep(0.01)
-
-
+                clock.tick(60)
 
     def get_state(self):
         with self.lock:
@@ -230,6 +312,7 @@ class XboxController():
         return state
 
 
+# see what you coded
 def main():
     xbox_controller = XboxController(print_events=True)
     xbox_controller.start()
